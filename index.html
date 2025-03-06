@@ -460,7 +460,8 @@
                 );
                 
                 // Test the connection
-                const { data, error } = await supabaseClient.from('leaderboard').select('count', { count: 'exact', head: true });
+                const { data, error } = await supabaseClient
+                    .rpc('get_top_scores', { limit_count: 1 });
                 
                 if (error) {
                     console.error("Error testing Supabase connection:", error);
@@ -499,10 +500,7 @@
                 document.querySelector('.leaderboard-container').innerHTML = '<div class="loading">Loading leaderboard...</div>';
                 
                 const { data, error } = await supabaseClient
-                    .from('leaderboard')
-                    .select('*')
-                    .order('score', { ascending: false })
-                    .limit(10);
+                    .rpc('get_top_scores', { limit_count: 10 });
                 
                 if (error) {
                     console.error("Error loading leaderboard:", error);
@@ -668,27 +666,17 @@
                     return false;
                 }
                 
-                // Test the connection by checking if the leaderboard table exists
+                // Check if the leaderboard exists
                 const { data, error } = await supabaseClient
-                    .from('leaderboard')
-                    .select('count')
-                    .limit(1);
+                    .rpc('get_top_scores', { limit_count: 1 });
                 
                 if (error) {
-                    console.error("Supabase connection test failed:", error);
-                    
-                    // Check if the error is due to the table not existing
-                    if (error.message && error.message.includes("not found")) {
-                        console.error("Leaderboard table does not exist. Please create it in your Supabase project.");
-                        alert("Leaderboard table not found. Please check your Supabase project setup.");
-                    } else {
-                        alert("Failed to connect to the leaderboard. Error: " + error.message);
-                    }
+                    console.error("Error checking leaderboard:", error);
                     return false;
-                } else {
-                    console.log("Supabase connection test successful:", data);
-                    return true;
                 }
+                
+                console.log("Supabase connection test successful:", data);
+                return true;
             } catch (error) {
                 console.error("Error testing Supabase connection:", error);
                 alert("Failed to connect to the leaderboard. Please check the console for details.");

@@ -2038,10 +2038,7 @@ async function checkHighScore() {
         
         // Get current top 10 scores
         const { data, error } = await supabaseClient
-            .from('leaderboard')
-            .select('*')
-            .order('score', { ascending: false })
-            .limit(10);
+            .rpc('get_top_scores', { limit_count: 10 });
             
         if (error) {
             console.error("Error fetching leaderboard:", error);
