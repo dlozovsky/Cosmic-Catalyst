@@ -43,12 +43,6 @@ To run the game locally:
 
 This game was last updated on May 5, 2024.
 
-## Security Notice
-
-⚠️ **Important Security Information** ⚠️
-
-The current implementation includes Supabase credentials directly in the frontend code. This is **NOT recommended for production** as it exposes your API keys to potential misuse. See the [Secure API Key Handling](#secure-api-key-handling) section below for proper security practices.
-
 ## Features
 
 - Smooth, physics-based spaceship controls
