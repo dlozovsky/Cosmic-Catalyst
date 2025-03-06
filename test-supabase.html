@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase Connection Test</h1>
+    
+    <div>
+        <button id="test-connection">Test Connection</button>
+        <button id="test-table">Test Leaderboard Table</button>
+        <button id="test-insert">Test Insert Record</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script>
+        // Function to add a result to the page
+        function addResult(message, type = 'info', details = null) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${type}`;
+            
+            let content = `<strong>${message}</strong>`;
+            if (details) {
+                content += `<pre>${JSON.stringify(details, null, 2)}</pre>`;
+            }
+            
+            resultDiv.innerHTML = content;
+            resultsDiv.prepend(resultDiv);
+        }
+        
+        // Initialize Supabase client
+        let supabaseClient;
+        try {
+            if (!window.supabase) {
+                addResult('Supabase library not loaded', 'error');
+            } else if (!supabaseConfig || !supabaseConfig.supabaseUrl || !supabaseConfig.supabaseAnonKey) {
+                addResult('Supabase configuration missing', 'error', supabaseConfig);
+            } else {
+                addResult('Supabase configuration loaded', 'info', {
+                    url: supabaseConfig.supabaseUrl,
+                    keyLength: supabaseConfig.supabaseAnonKey.length
+                });
+                
+                supabaseClient = window.supabase.createClient(
+                    supabaseConfig.supabaseUrl, 
+                    supabaseConfig.supabaseAnonKey
+                );
+                
+                addResult('Supabase client initialized', 'success');
+            }
+        } catch (error) {
+            addResult('Error initializing Supabase client', 'error', error);
+        }
+        
+        // Test connection
+        document.getElementById('test-connection').addEventListener('click', async () => {
+            try {
+                if (!supabaseClient) {
+                    addResult('Supabase client not initialized', 'error');
+                    return;
+                }
+                
+                addResult('Testing connection...', 'info');
+                
+                const { data, error } = await supabaseClient.auth.getSession();
+                
+                if (error) {
+                    addResult('Connection test failed', 'error', error);
+                } else {
+                    addResult('Connection test successful', 'success', data);
+                }
+            } catch (error) {
+                addResult('Error testing connection', 'error', error);
+            }
+        });
+        
+        // Test leaderboard table
+        document.getElementById('test-table').addEventListener('click', async () => {
+            try {
+                if (!supabaseClient) {
+                    addResult('Supabase client not initialized', 'error');
+                    return;
+                }
+                
+                addResult('Testing leaderboard table...', 'info');
+                
+                const { data, error } = await supabaseClient
+                    .from('leaderboard')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    addResult('Leaderboard table test failed', 'error', error);
+                } else {
+                    addResult('Leaderboard table test successful', 'success', data);
+                }
+            } catch (error) {
+                addResult('Error testing leaderboard table', 'error', error);
+            }
+        });
+        
+        // Test insert record
+        document.getElementById('test-insert').addEventListener('click', async () => {
+            try {
+                if (!supabaseClient) {
+                    addResult('Supabase client not initialized', 'error');
+                    return;
+                }
+                
+                addResult('Testing insert record...', 'info');
+                
+                const testData = {
+                    player_name: 'Test User ' + new Date().toISOString(),
+                    email: 'test' + Date.now() + '@example.com',
+                    score: Math.floor(Math.random() * 1000),
+                    level: Math.floor(Math.random() * 5) + 1,
+                    wave: Math.floor(Math.random() * 10) + 1,
+                    shared_on_x: false
+                };
+                
+                addResult('Inserting test data', 'info', testData);
+                
+                const { data, error } = await supabaseClient
+                    .from('leaderboard')
+                    .insert([testData]);
+                
+                if (error) {
+                    addResult('Insert test failed', 'error', error);
+                } else {
+                    addResult('Insert test successful', 'success', data);
+                }
+            } catch (error) {
+                addResult('Error testing insert', 'error', error);
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #0a0a1a;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        #debug-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            font-family: monospace;
+            padding: 10px;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- p5.js will create the canvas element here -->
+    </div>
+    
+    <div id="debug-console"></div>
+    
+    <script>
+        // Override console.log to display in our custom console
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        
+        console.log = function() {
+            // Call the original console.log
+            originalConsoleLog.apply(console, arguments);
+            
+            // Add to our debug console
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                const message = Array.from(arguments).join(' ');
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[LOG] ${message}`;
+                debugConsole.appendChild(logEntry);
+                debugConsole.scrollTop = debugConsole.scrollHeight;
+            }
+        };
+        
+        console.error = function() {
+            // Call the original console.error
+            originalConsoleError.apply(console, arguments);
+            
+            // Add to our debug console
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                const message = Array.from(arguments).join(' ');
+                const logEntry = document.createElement('div');
+                logEntry.style.color = 'red';
+                logEntry.textContent = `[ERROR] ${message}`;
+                debugConsole.appendChild(logEntry);
+                debugConsole.scrollTop = debugConsole.scrollHeight;
+            }
+        };
+        
+        // Create a mock Supabase client to prevent errors
+        window.supabase = {
+            createClient: function() {
+                console.log("Creating mock Supabase client");
+                return {
+                    from: function() {
+                        return {
+                            select: function() { return this; },
+                            order: function() { return this; },
+                            limit: function() { return this; },
+                            insert: function() { return this; },
+                            update: function() { return this; },
+                            eq: function() { return this; },
+                            then: function(callback) {
+                                callback({ data: [], error: null });
+                                return this;
+                            }
+                        };
+                    }
+                };
+            }
+        };
+        
+        // Create a mock supabaseConfig object
+        window.supabaseConfig = {
+            supabaseUrl: "https://example.com",
+            supabaseAnonKey: "mock-key"
+        };
+    </script>
+    
+    <!-- Load the p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    
+    <!-- Load your sketch file -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("Debug page loaded");
+            console.log("Loading sketch.js...");
+            
+            const script = document.createElement('script');
+            script.src = "sketch.js";
+            script.onload = function() {
+                console.log("sketch.js loaded successfully");
+            };
+            script.onerror = function() {
+                console.error("Failed to load sketch.js");
+            };
+            document.body.appendChild(script);
+        });
+    </script>
+</body>
+</html> 

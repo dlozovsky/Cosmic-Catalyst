@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Game Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0a0a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #controls {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        
+        button {
+            margin: 5px;
+            padding: 8px 12px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #444;
+        }
+        
+        #status {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            max-width: 80%;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <button onclick="manualStart()">Start Game</button>
+        <button onclick="manualReset()">Reset Game</button>
+        <button onclick="checkState()">Check State</button>
+    </div>
+    
+    <div id="game-container">
+        <!-- p5.js will create the canvas here -->
+    </div>
+    
+    <div id="status"></div>
+    
+    <script>
+        // Mock required DOM elements
+        document.body.innerHTML += `
+            <div id="score-modal" style="display: none;"></div>
+            <div id="leaderboard-modal" style="display: none;"></div>
+        `;
+        
+        // Status display
+        const statusEl = document.getElementById('status');
+        function updateStatus(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            statusEl.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            statusEl.scrollTop = statusEl.scrollHeight;
+            console.log(message);
+        }
+        
+        // Mock Supabase
+        window.supabaseConfig = {
+            supabaseUrl: "https://example.com",
+            supabaseAnonKey: "mock-key"
+        };
+        
+        window.supabase = {
+            createClient: function() {
+                updateStatus("Mock Supabase client created");
+                return {
+                    from: function() {
+                        return {
+                            select: function() { return this; },
+                            order: function() { return this; },
+                            limit: function() { return this; },
+                            then: function(callback) {
+                                callback({ data: [], error: null });
+                                return this;
+                            }
+                        };
+                    }
+                };
+            }
+        };
+        
+        // Initialize game state variables
+        window.gameStarted = false;
+        window.gameOver = false;
+        window.waveNumber = 1;
+        window.p5KeyboardHandlingDisabled = false;
+        
+        // Control functions
+        function manualStart() {
+            updateStatus("Manual start requested");
+            if (window.gameStarted !== undefined) {
+                window.gameStarted = true;
+                updateStatus("Game started: " + window.gameStarted);
+            }
+        }
+        
+        function manualReset() {
+            updateStatus("Manual reset requested");
+            if (window.resetGame && typeof window.resetGame === 'function') {
+                window.resetGame();
+                updateStatus("Game reset called");
+            } else {
+                updateStatus("ERROR: resetGame function not available");
+            }
+        }
+        
+        function checkState() {
+            updateStatus("Game state: " + 
+                JSON.stringify({
+                    gameStarted: window.gameStarted,
+                    gameOver: window.gameOver,
+                    waveNumber: window.waveNumber,
+                    p5KeyboardHandlingDisabled: window.p5KeyboardHandlingDisabled
+                }, null, 2)
+            );
+        }
+        
+        // Keyboard event listener
+        document.addEventListener('keydown', function(event) {
+            updateStatus(`Key pressed: ${event.key} (${event.keyCode})`);
+            if (event.key === 'Enter') {
+                updateStatus("Enter key detected - should start/reset game");
+            }
+        });
+        
+        // Load scripts
+        updateStatus("Loading p5.js...");
+        const p5Script = document.createElement('script');
+        p5Script.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js";
+        p5Script.onload = function() {
+            updateStatus("p5.js loaded successfully");
+            
+            updateStatus("Loading sketch.js...");
+            const sketchScript = document.createElement('script');
+            sketchScript.src = "sketch.js";
+            sketchScript.onload = function() {
+                updateStatus("sketch.js loaded successfully");
+                setTimeout(checkState, 1000);
+            };
+            sketchScript.onerror = function() {
+                updateStatus("ERROR: Failed to load sketch.js");
+            };
+            document.body.appendChild(sketchScript);
+        };
+        p5Script.onerror = function() {
+            updateStatus("ERROR: Failed to load p5.js");
+        };
+        document.body.appendChild(p5Script);
+    </script>
+</body>
+</html> 

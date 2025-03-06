@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Game Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #0a0a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 1000px;
+            height: 700px;
+            border: 1px solid #333;
+        }
+        
+        #debug-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            z-index: 1000;
+        }
+        
+        #debug-log {
+            height: 150px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        
+        .debug-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            padding: 5px 10px;
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container"></div>
+    
+    <div id="debug-panel">
+        <div class="debug-buttons">
+            <button onclick="startGame()">Start Game</button>
+            <button onclick="resetGameManually()">Reset Game</button>
+            <button onclick="toggleLoop()">Toggle Loop</button>
+            <button onclick="logGameState()">Log Game State</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+        <div id="debug-log"></div>
+    </div>
+    
+    <script>
+        // Override console.log to display in debug panel
+        const originalLog = console.log;
+        const originalError = console.error;
+        const debugLog = document.getElementById('debug-log');
+        
+        console.log = function() {
+            originalLog.apply(console, arguments);
+            const message = Array.from(arguments).join(' ');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = `[LOG] ${message}`;
+            debugLog.appendChild(logEntry);
+            debugLog.scrollTop = debugLog.scrollHeight;
+        };
+        
+        console.error = function() {
+            originalError.apply(console, arguments);
+            const message = Array.from(arguments).join(' ');
+            const logEntry = document.createElement('div');
+            logEntry.style.color = 'red';
+            logEntry.textContent = `[ERROR] ${message}`;
+            debugLog.appendChild(logEntry);
+            debugLog.scrollTop = debugLog.scrollHeight;
+        };
+        
+        // Mock Supabase
+        window.supabase = {
+            createClient: function() {
+                console.log("Creating mock Supabase client");
+                return {
+                    from: function() {
+                        return {
+                            select: function() { return this; },
+                            order: function() { return this; },
+                            limit: function() { return this; },
+                            then: function(callback) {
+                                callback({ data: [], error: null });
+                                return this;
+                            }
+                        };
+                    }
+                };
+            }
+        };
+        
+        // Mock supabaseConfig
+        window.supabaseConfig = {
+            supabaseUrl: "https://example.com",
+            supabaseAnonKey: "mock-key"
+        };
+        
+        // Disable p5.js keyboard handling initially
+        window.p5KeyboardHandlingDisabled = false;
+        
+        // Debug functions
+        function startGame() {
+            console.log("Manually starting game");
+            if (window.gameStarted !== undefined) {
+                window.gameStarted = true;
+                console.log("Set gameStarted to true");
+            } else {
+                console.error("gameStarted variable not found on window object");
+            }
+        }
+        
+        function resetGameManually() {
+            console.log("Manually resetting game");
+            if (window.resetGame && typeof window.resetGame === 'function') {
+                window.resetGame();
+                console.log("Game reset called");
+            } else {
+                console.error("resetGame function not found on window object");
+            }
+        }
+        
+        function toggleLoop() {
+            if (window.loop && typeof window.loop === 'function') {
+                console.log("Calling loop()");
+                window.loop();
+            } else if (window.noLoop && typeof window.noLoop === 'function') {
+                console.log("Calling noLoop()");
+                window.noLoop();
+            } else {
+                console.error("loop/noLoop functions not found on window object");
+            }
+        }
+        
+        function logGameState() {
+            console.log("Current game state:", {
+                gameStarted: window.gameStarted,
+                gameOver: window.gameOver,
+                waveNumber: window.waveNumber,
+                p5KeyboardHandlingDisabled: window.p5KeyboardHandlingDisabled
+            });
+        }
+        
+        function clearLog() {
+            debugLog.innerHTML = '';
+        }
+        
+        // Load p5.js
+        const p5Script = document.createElement('script');
+        p5Script.src = "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js";
+        p5Script.onload = function() {
+            console.log("p5.js loaded");
+            
+            // Load sketch.js
+            const sketchScript = document.createElement('script');
+            sketchScript.src = "sketch.js";
+            sketchScript.onload = function() {
+                console.log("sketch.js loaded");
+                setTimeout(logGameState, 1000); // Log initial game state after a delay
+            };
+            sketchScript.onerror = function() {
+                console.error("Failed to load sketch.js");
+            };
+            document.body.appendChild(sketchScript);
+        };
+        p5Script.onerror = function() {
+            console.error("Failed to load p5.js");
+        };
+        document.body.appendChild(p5Script);
+    </script>
+</body>
+</html> 

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Cosmic Catalyst</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #0a0a1a;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container {
+            background-color: rgba(10, 20, 40, 0.95);
+            border: 2px solid #0096ff;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.7);
+        }
+        
+        h1 {
+            color: #0096ff;
+            margin-top: 0;
+            text-align: center;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+            margin-top: 20px;
+        }
+        
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+        }
+        
+        .leaderboard-table th {
+            background-color: rgba(0, 100, 200, 0.3);
+            color: #0096ff;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        
+        .leaderboard-table tr:nth-child(even) {
+            background-color: rgba(0, 50, 100, 0.2);
+        }
+        
+        .leaderboard-table tr:hover {
+            background-color: rgba(0, 100, 200, 0.2);
+        }
+        
+        .btn {
+            background-color: #0096ff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            background-color: #00b0ff;
+        }
+        
+        .buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+    <!-- Load Supabase JS library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Load your configuration file -->
+    <script src="supabase-config.js"></script>
+    <script>
+        // Initialize Supabase client
+        let supabaseClient;
+        let leaderboardData = [];
+        
+        // Load leaderboard data
+        async function loadLeaderboard() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('leaderboard')
+                    .select('*')
+                    .order('score', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                leaderboardData = data;
+                updateLeaderboardDisplay();
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+            }
+        }
+        
+        // Update leaderboard display
+        function updateLeaderboardDisplay() {
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            if (!leaderboardBody) return;
+            
+            leaderboardBody.innerHTML = '';
+            
+            if (leaderboardData.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 5;
+                cell.textContent = 'No scores yet. Be the first to submit a score!';
+                cell.style.textAlign = 'center';
+                cell.style.padding = '20px';
+                row.appendChild(cell);
+                leaderboardBody.appendChild(row);
+                return;
+            }
+            
+            leaderboardData.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                
+                const rankCell = document.createElement('td');
+                rankCell.textContent = index + 1;
+                
+                const nameCell = document.createElement('td');
+                nameCell.textContent = entry.player_name;
+                
+                const scoreCell = document.createElement('td');
+                scoreCell.textContent = entry.score;
+                
+                const levelCell = document.createElement('td');
+                levelCell.textContent = entry.level || 1;
+                
+                const waveCell = document.createElement('td');
+                waveCell.textContent = entry.wave || '-';
+                
+                row.appendChild(rankCell);
+                row.appendChild(nameCell);
+                row.appendChild(scoreCell);
+                row.appendChild(levelCell);
+                row.appendChild(waveCell);
+                
+                leaderboardBody.appendChild(row);
+            });
+        }
+        
+        // DOM event handlers
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize Supabase client
+            try {
+                supabaseClient = window.supabase.createClient(
+                    supabaseConfig.supabaseUrl, 
+                    supabaseConfig.supabaseAnonKey
+                );
+                
+                // Load leaderboard data
+                loadLeaderboard();
+            } catch (error) {
+                console.error("Error initializing Supabase client:", error);
+                document.getElementById('error-message').textContent = 'Error loading leaderboard. Please try again later.';
+                document.getElementById('error-message').style.display = 'block';
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Cosmic Catalyst Leaderboard</h1>
+        
+        <div id="error-message" style="display: none; color: red; text-align: center; margin-bottom: 20px;"></div>
+        
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                    <th>Level</th>
+                    <th>Wave</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+                <!-- Leaderboard data will be inserted here -->
+            </tbody>
+        </table>
+        
+        <div class="buttons">
+            <a href="index.html" class="btn">Back to Game</a>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Cosmic Catalyst</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        #console-log {
+            background-color: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Cosmic Catalyst</h1>
+    <div id="console-log"></div>
+    <div>
+        <button onclick="testSupabaseConfig()">Test Supabase Config</button>
+        <button onclick="testP5js()">Test P5.js</button>
+        <button onclick="window.location.href='index.html'">Go to Game</button>
+    </div>
+
+    <script>
+        // Override console.log to display in our custom console
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        
+        console.log = function() {
+            const args = Array.from(arguments);
+            const consoleLog = document.getElementById('console-log');
+            consoleLog.innerHTML += `<div style="color: #0f0;">[LOG] ${args.join(' ')}</div>`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+            originalConsoleLog.apply(console, arguments);
+        };
+        
+        console.error = function() {
+            const args = Array.from(arguments);
+            const consoleLog = document.getElementById('console-log');
+            consoleLog.innerHTML += `<div style="color: #f00;">[ERROR] ${args.join(' ')}</div>`;
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+            originalConsoleError.apply(console, arguments);
+        };
+        
+        // Test Supabase Config
+        function testSupabaseConfig() {
+            try {
+                console.log("Loading supabase-config.js...");
+                const script = document.createElement('script');
+                script.src = 'supabase-config.js';
+                script.onload = function() {
+                    console.log("supabase-config.js loaded successfully");
+                    if (typeof supabaseConfig !== 'undefined') {
+                        console.log("supabaseConfig object exists:", supabaseConfig);
+                    } else {
+                        console.error("supabaseConfig object is undefined");
+                    }
+                };
+                script.onerror = function() {
+                    console.error("Failed to load supabase-config.js");
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error("Error testing Supabase config:", error);
+            }
+        }
+        
+        // Test P5.js
+        function testP5js() {
+            try {
+                console.log("Loading p5.js...");
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js';
+                script.onload = function() {
+                    console.log("p5.js loaded successfully");
+                    if (typeof p5 !== 'undefined') {
+                        console.log("p5 object exists");
+                        
+                        // Try to create a simple sketch
+                        try {
+                            new p5(function(p) {
+                                p.setup = function() {
+                                    console.log("p5 setup function called");
+                                    p.createCanvas(100, 100);
+                                    p.background(200);
+                                };
+                                
+                                p.draw = function() {
+                                    p.ellipse(50, 50, 50, 50);
+                                };
+                            }, 'p5-container');
+                            console.log("p5 sketch created successfully");
+                        } catch (error) {
+                            console.error("Error creating p5 sketch:", error);
+                        }
+                    } else {
+                        console.error("p5 object is undefined");
+                    }
+                };
+                script.onerror = function() {
+                    console.error("Failed to load p5.js");
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error("Error testing p5.js:", error);
+            }
+        }
+        
+        console.log("Debug page loaded");
+    </script>
+    <div id="p5-container"></div>
+</body>
+</html> 

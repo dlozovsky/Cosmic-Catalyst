@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Catalyst</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #0a0a1a;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
+            max-width: 100%;
+            padding: 0;
+            position: absolute;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+        }
+        
+        canvas {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            max-height: 95vh;
+            border: 3px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
+            background-color: #000;
+        }
+        
+        .header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            color: #0af;
+            text-shadow: 0 0 10px rgba(0, 150, 255, 0.7);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #aaf;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(10, 20, 40, 0.95);
+            border: 2px solid #0096ff;
+            border-radius: 10px;
+            padding: 30px;
+            z-index: 1000;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.7);
+        }
+        
+        .modal h2 {
+            color: #0096ff;
+            margin-top: 0;
+            text-align: center;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .modal p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #0096ff;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #0096ff;
+            background-color: rgba(0, 20, 40, 0.5);
+            color: #fff;
+            border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            box-shadow: 0 0 5px #0af;
+        }
+        
+        .btn {
+            background-color: #0096ff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            background-color: #00b0ff;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #aaf;
+        }
+        
+        .controls {
+            margin-top: 15px;
+            background: rgba(10, 20, 50, 0.5);
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .controls h3 {
+            margin-top: 0;
+            color: #0af;
+        }
+        
+        .controls p {
+            margin: 5px 0;
+        }
+        
+        .leaderboard {
+            margin-top: 20px;
+            background: rgba(10, 20, 50, 0.5);
+            padding: 20px;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .leaderboard h3 {
+            margin-top: 0;
+            color: #0af;
+            text-align: center;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #fff;
+        }
+        
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 150, 255, 0.3);
+        }
+        
+        .leaderboard-table th {
+            background-color: rgba(0, 100, 200, 0.3);
+            color: #0096ff;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        
+        .leaderboard-table tr:nth-child(even) {
+            background-color: rgba(0, 50, 100, 0.2);
+        }
+        
+        .leaderboard-table tr:hover {
+            background-color: rgba(0, 100, 200, 0.2);
+        }
+        
+        .help-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 150, 255, 0.7);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 150, 255, 0.5);
+            z-index: 10;
+        }
+        
+        .help-content {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .help-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .help-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .help-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 150, 255, 0.5);
+            border-radius: 4px;
+        }
+        
+        .social-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+        }
+        
+        .share-x-btn {
+            background-color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .share-x-btn:hover {
+            background-color: #333;
+        }
+        
+        .x-logo {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .view-leaderboard-btn {
+            width: 100%;
+            margin-top: 10px;
+            background-color: #4a00e0;
+        }
+        
+        .view-leaderboard-btn:hover {
+            background-color: #5c14ff;
+        }
+        
+        .floating-btn {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .floating-btn:hover {
+            transform: scale(1.1);
+            background-color: #45a049;
+        }
+        
+        .trophy-icon {
+            font-size: 24px;
+        }
+        
+        @media (max-width: 800px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            canvas {
+                width: 100%;
+                height: auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .modal {
+                padding: 20px;
+                width: 85%;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            .floating-btn {
+                width: 40px;
+                height: 40px;
+                top: 10px;
+                right: 60px;
+            }
+            
+            .help-btn {
+                width: 35px;
+                height: 35px;
+                top: 10px;
+                right: 15px;
+                font-size: 16px;
+            }
+            
+            .trophy-icon {
+                font-size: 18px;
+            }
+        }
+        
+        /* Error message styling */
+        .error-message {
+            color: #ff3333;
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff3333;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        /* Loading state */
+        .loading {
+            color: #33ccff;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+        
+        /* No data message */
+        .no-data {
+            color: #aaaaaa;
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+        }
+    </style>
+    <!-- Load the p5.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <!-- Load Supabase JS library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Load your configuration file -->
+    <script src="supabase-config.js"></script>
+    <!-- Load your sketch file -->
+    <script src="sketch.js"></script>
+    <script>
+        // Global variable to store leaderboard data
+        let leaderboardData = [];
+        let supabaseClient; // Global supabase client
+        let supabaseInitialized = false;
+        
+        async function initializeSupabase() {
+            if (supabaseInitialized) return;
+            
+            try {
+                console.log("Initializing Supabase...");
+                
+                // Check if supabase library is loaded
+                if (!window.supabase) {
+                    console.error("Supabase library not loaded");
+                    throw new Error("Supabase library not loaded");
+                }
+                
+                // Check if config is available
+                if (!supabaseConfig || !supabaseConfig.supabaseUrl || !supabaseConfig.supabaseAnonKey) {
+                    console.error("Supabase configuration missing");
+                    throw new Error("Supabase configuration missing");
+                }
+                
+                console.log("Initializing Supabase with:", {
+                    url: supabaseConfig.supabaseUrl,
+                    key: supabaseConfig.supabaseAnonKey.substring(0, 10) + "..." // Only log part of the key for security
+                });
+                
+                // The correct way to initialize Supabase client
+                supabaseClient = window.supabase.createClient(
+                    supabaseConfig.supabaseUrl, 
+                    supabaseConfig.supabaseAnonKey
+                );
+                
+                // Test the connection
+                const { data, error } = await supabaseClient.from('leaderboard').select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    console.error("Error testing Supabase connection:", error);
+                    throw error;
+                }
+                
+                console.log("Supabase client initialized successfully");
+                supabaseInitialized = true;
+                
+                // Load leaderboard data after successful initialization
+                loadLeaderboard();
+                
+                return true;
+            } catch (error) {
+                console.error("Error initializing Supabase client:", error);
+                supabaseClient = null;
+                return false;
+            }
+        }
+        
+        // Call initialization on page load
+        window.addEventListener('DOMContentLoaded', initializeSupabase);
+        
+        // Load leaderboard data
+        async function loadLeaderboard() {
+            try {
+                // Check if Supabase is initialized
+                if (!supabaseClient) {
+                    console.error("Cannot load leaderboard: Supabase client not initialized");
+                    document.querySelector('.leaderboard-container').innerHTML = 
+                        '<div class="error-message">Unable to load leaderboard. Please try again later.</div>';
+                    return;
+                }
+                
+                console.log("Loading leaderboard data...");
+                document.querySelector('.leaderboard-container').innerHTML = '<div class="loading">Loading leaderboard...</div>';
+                
+                const { data, error } = await supabaseClient
+                    .from('leaderboard')
+                    .select('*')
+                    .order('score', { ascending: false })
+                    .limit(10);
+                
+                if (error) {
+                    console.error("Error loading leaderboard:", error);
+                    document.querySelector('.leaderboard-container').innerHTML = 
+                        '<div class="error-message">Error loading leaderboard: ' + error.message + '</div>';
+                    return;
+                }
+                
+                if (!data || data.length === 0) {
+                    console.log("No leaderboard data found");
+                    document.querySelector('.leaderboard-container').innerHTML = 
+                        '<div class="no-data">No scores yet! Be the first to submit your score.</div>';
+                    return;
+                }
+                
+                console.log("Leaderboard data loaded:", data);
+                leaderboardData = data;
+                
+                // Generate leaderboard HTML
+                let leaderboardHTML = `
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Score</th>
+                                <th>Level</th>
+                                <th>Wave</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                data.forEach((entry, index) => {
+                    leaderboardHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${entry.player_name}</td>
+                            <td>${entry.score}</td>
+                            <td>${entry.level || 1}</td>
+                            <td>${entry.wave || 1}</td>
+                        </tr>
+                    `;
+                });
+                
+                leaderboardHTML += `
+                        </tbody>
+                    </table>
+                `;
+                
+                document.querySelector('.leaderboard-container').innerHTML = leaderboardHTML;
+            } catch (error) {
+                console.error("Error in loadLeaderboard:", error);
+                document.querySelector('.leaderboard-container').innerHTML = 
+                    '<div class="error-message">An unexpected error occurred while loading the leaderboard.</div>';
+            }
+        }
+        
+        // Submit score to leaderboard
+        async function submitScore(playerName, email, score, level, wave) {
+            try {
+                console.log("Starting score submission process...");
+                
+                // Validate inputs
+                if (!playerName || !email || !score) {
+                    console.error("Missing required fields for score submission");
+                    return { success: false, error: "Missing required fields" };
+                }
+                
+                // Check if Supabase client is initialized
+                if (!supabaseClient) {
+                    console.error("Supabase client not initialized");
+                    return { success: false, error: "Database connection not available" };
+                }
+                
+                // Log the Supabase client state
+                console.log("Supabase client state:", {
+                    initialized: supabaseInitialized,
+                    clientExists: !!supabaseClient,
+                    supabaseUrl: supabaseConfig?.supabaseUrl,
+                    keyLength: supabaseConfig?.supabaseAnonKey?.length || 0
+                });
+                
+                console.log("Submitting to Supabase:", { 
+                    player_name: playerName,
+                    email: email,
+                    score: score,
+                    level: level,
+                    wave: wave
+                });
+                
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('leaderboard')
+                        .insert([
+                            { 
+                                player_name: playerName,
+                                email: email,
+                                score: score,
+                                level: level,
+                                wave: wave,
+                                shared_on_x: false
+                            }
+                        ]);
+                    
+                    if (error) {
+                        console.error("Supabase error details:", error);
+                        throw error;
+                    }
+                    
+                    console.log("Score submitted successfully:", data);
+                    
+                    // Reload leaderboard after submission
+                    loadLeaderboard();
+                    return { success: true, data };
+                } catch (insertError) {
+                    console.error("Error during insert operation:", insertError);
+                    return { success: false, error: insertError.message || "Error during database operation" };
+                }
+            } catch (error) {
+                console.error('Error submitting score (outer try/catch):', error);
+                return { success: false, error: error.message || "Unknown error occurred" };
+            }
+        }
+        
+        // Share score on X (Twitter)
+        function shareOnX(playerName, score, wave, level) {
+            const text = `I just scored ${score} points in Cosmic Catalyst, reaching Wave ${wave} and Level ${level}! Can you beat my score? Play now: ${window.location.href} #CosmicCatalyst #SpaceShooter`;
+            const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+            
+            // Update shared status in database if we have a record ID
+            if (window.currentScoreId) {
+                updateSharedStatus(window.currentScoreId);
+            }
+            
+            // Open Twitter intent in a new window
+            window.open(url, '_blank', 'width=550,height=420');
+            return false;
+        }
+        
+        // Update shared status in database
+        async function updateSharedStatus(recordId) {
+            try {
+                const { error } = await supabaseClient
+                    .from('leaderboard')
+                    .update({ shared_on_x: true })
+                    .eq('id', recordId);
+                
+                if (error) throw error;
+            } catch (error) {
+                console.error('Error updating shared status:', error);
+            }
+        }
+        
+        // Test Supabase connection
+        async function testSupabaseConnection() {
+            try {
+                console.log("Testing Supabase connection...");
+                
+                // Check if Supabase client is initialized
+                if (!supabaseClient) {
+                    console.error("Supabase client not initialized");
+                    return false;
+                }
+                
+                // Test the connection by checking if the leaderboard table exists
+                const { data, error } = await supabaseClient
+                    .from('leaderboard')
+                    .select('count')
+                    .limit(1);
+                
+                if (error) {
+                    console.error("Supabase connection test failed:", error);
+                    
+                    // Check if the error is due to the table not existing
+                    if (error.message && error.message.includes("not found")) {
+                        console.error("Leaderboard table does not exist. Please create it in your Supabase project.");
+                        alert("Leaderboard table not found. Please check your Supabase project setup.");
+                    } else {
+                        alert("Failed to connect to the leaderboard. Error: " + error.message);
+                    }
+                    return false;
+                } else {
+                    console.log("Supabase connection test successful:", data);
+                    return true;
+                }
+            } catch (error) {
+                console.error("Error testing Supabase connection:", error);
+                alert("Failed to connect to the leaderboard. Please check the console for details.");
+                return false;
+            }
+        }
+        
+        // DOM event handlers
+        window.addEventListener('DOMContentLoaded', () => {
+            // Test Supabase connection
+            testSupabaseConnection();
+            
+            // Load initial leaderboard data
+            loadLeaderboard();
+            
+            // Add direct event listeners to input fields
+            const playerNameInput = document.getElementById('player-name');
+            const emailInput = document.getElementById('email');
+            
+            if (playerNameInput) {
+                playerNameInput.addEventListener('keydown', function(e) {
+                    e.stopPropagation();
+                }, true);
+            }
+            
+            if (emailInput) {
+                emailInput.addEventListener('keydown', function(e) {
+                    e.stopPropagation();
+                }, true);
+            }
+            
+            // Global function to show the score submission modal
+            window.showScoreSubmission = function(score, level, wave) {
+                // Disable p5.js keyboard handling
+                if (window.p5KeyboardHandlingDisabled !== undefined) {
+                    window.p5KeyboardHandlingDisabled = true;
+                }
+                
+                document.getElementById('final-score').textContent = score;
+                document.getElementById('final-level').textContent = level;
+                document.getElementById('final-wave').textContent = wave || 1;
+                document.getElementById('score-modal').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+                
+                // Focus on the player name input field after a short delay
+                setTimeout(() => {
+                    const playerNameInput = document.getElementById('player-name');
+                    if (playerNameInput) {
+                        playerNameInput.focus();
+                        // Try to force the input to be editable
+                        playerNameInput.readOnly = false;
+                        playerNameInput.disabled = false;
+                    }
+                }, 100);
+            };
+            
+            // Close modals when clicking the close button
+            document.querySelectorAll('.close-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Re-enable p5.js keyboard handling
+                    if (window.p5KeyboardHandlingDisabled !== undefined) {
+                        window.p5KeyboardHandlingDisabled = false;
+                    }
+                    
+                    // Resume the game loop if it was paused
+                    if (window.loop) {
+                        window.loop();
+                    }
+                    
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                    document.getElementById('overlay').style.display = 'none';
+                });
+            });
+            
+            // Close modals when clicking outside
+            document.getElementById('overlay').addEventListener('click', () => {
+                // Re-enable p5.js keyboard handling
+                if (window.p5KeyboardHandlingDisabled !== undefined) {
+                    window.p5KeyboardHandlingDisabled = false;
+                }
+                
+                // Resume the game loop if it was paused
+                if (window.loop) {
+                    window.loop();
+                }
+                
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+                document.getElementById('overlay').style.display = 'none';
+            });
+            
+            // Score submission form
+            document.getElementById('score-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                console.log("Score form submitted");
+                
+                // Disable submit button and show loading state
+                const submitButton = document.querySelector('#score-form button[type="submit"]');
+                submitButton.disabled = true;
+                submitButton.textContent = "Submitting...";
+                
+                // Clear any previous error messages
+                const errorElement = document.getElementById('score-submit-error');
+                if (errorElement) {
+                    errorElement.style.display = 'none';
+                }
+                
+                // Ensure Supabase is initialized
+                if (!supabaseInitialized) {
+                    console.log("Supabase not initialized, attempting to initialize...");
+                    const initialized = await initializeSupabase();
+                    if (!initialized) {
+                        // Show error if initialization failed
+                        const errorElement = document.createElement('div');
+                        errorElement.id = 'score-submit-error';
+                        errorElement.className = 'error-message';
+                        errorElement.textContent = "Unable to connect to leaderboard. Please try again later.";
+                        document.getElementById('score-form').prepend(errorElement);
+                        errorElement.style.display = 'block';
+                        
+                        // Reset button
+                        submitButton.disabled = false;
+                        submitButton.textContent = "Submit Score";
+                        return;
+                    }
+                }
+                
+                const playerName = document.getElementById('player-name').value;
+                const email = document.getElementById('email').value;
+                const score = parseInt(document.getElementById('final-score').textContent);
+                const level = parseInt(document.getElementById('final-level').textContent);
+                const wave = parseInt(document.getElementById('final-wave').textContent);
+                
+                console.log("Submitting score:", { playerName, email, score, level, wave });
+                
+                const result = await submitScore(playerName, email, score, level, wave);
+                
+                if (result.success) {
+                    // Store the record ID for potential sharing
+                    if (result.data && result.data[0]) {
+                        window.currentScoreId = result.data[0].id;
+                    }
+                    
+                    // Show thank you message with share option
+                    document.getElementById('score-form-content').innerHTML = `
+                        <h2>Score Submitted!</h2>
+                        <p>Thanks ${playerName}! Your score of ${score} has been added to the leaderboard.</p>
+                        <div class="social-buttons">
+                            <button type="button" class="btn share-x-btn" onclick="shareOnX('${playerName}', ${score}, ${wave}, ${level})">
+                                <img src="https://abs.twimg.com/responsive-web/web/icon-default.3c3b62c1.png" alt="X Logo" class="x-logo">
+                                Share on X
+                            </button>
+                            <button type="button" class="btn" onclick="document.getElementById('score-modal').style.display = 'none'; document.getElementById('overlay').style.display = 'none';">
+                                Play Again
+                            </button>
+                        </div>
+                        <button type="button" class="btn view-leaderboard-btn" onclick="document.getElementById('score-modal').style.display = 'none'; document.getElementById('leaderboard-modal').style.display = 'block';">
+                            View Leaderboard
+                        </button>
+                    `;
+                    
+                    // Reset the game
+                    if (window.resetGame) {
+                        window.resetGame();
+                    }
+                } else {
+                    // Show error message
+                    console.error("Error submitting score:", result.error);
+                    
+                    // Create error message element if it doesn't exist
+                    errorElement = document.createElement('div');
+                    errorElement.id = 'score-submit-error';
+                    errorElement.className = 'error-message';
+                    document.getElementById('score-form').prepend(errorElement);
+                    
+                    // Display error message with more details
+                    let errorMessage = "Error submitting score. ";
+                    
+                    // Add more specific error messages based on the error
+                    if (result.error.includes("duplicate key")) {
+                        errorMessage += "You have already submitted a score with this email.";
+                    } else if (result.error.includes("not found")) {
+                        errorMessage += "The leaderboard table doesn't exist.";
+                    } else if (result.error.includes("permission denied")) {
+                        errorMessage += "Permission denied. Please check your Supabase permissions.";
+                    } else if (result.error.includes("network")) {
+                        errorMessage += "Network error. Please check your internet connection.";
+                    } else {
+                        errorMessage += "Please try again. Error: " + result.error;
+                    }
+                    
+                    errorElement.textContent = errorMessage;
+                    errorElement.style.display = 'block';
+                    
+                    // Enable the submit button again
+                    submitButton.disabled = false;
+                    submitButton.textContent = "Submit Score";
+                }
+            });
+            
+            // Show leaderboard button
+            document.getElementById('show-leaderboard-btn').addEventListener('click', () => {
+                console.log("Leaderboard button clicked");
+                document.getElementById('leaderboard-modal').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+                loadLeaderboard(); // Refresh leaderboard data
+            });
+        });
+        
+        // Modify the window load event handler to prevent unwanted resets
+        window.addEventListener('load', function() {
+            if (sessionStorage.getItem('returningToGame') === 'true') {
+                // Clear the flag
+                sessionStorage.removeItem('returningToGame');
+                
+                console.log("Returning to game from another page");
+                
+                // Don't reset the game automatically when returning
+                // Instead, just ensure the game can continue if it was in progress
+                if (window.gameOver === true) {
+                    console.log("Game was over, resetting only if explicitly needed");
+                    
+                    // Only reset if we're at wave 1 (new game)
+                    // For all other waves, just resume the game
+                    if (window.waveNumber <= 1) {
+                        console.log("At wave 1, performing reset");
+                        if (window.resetGame && typeof window.resetGame === 'function') {
+                            window.resetGame();
+                        }
+                    } else {
+                        console.log("At wave " + window.waveNumber + ", just resuming without reset");
+                        // Just ensure the game is not over and can continue
+                        window.gameOver = false;
+                        if (window.gameStarted !== undefined) {
+                            window.gameStarted = true;
+                        }
+                    }
+                }
+                
+                // Resume the game loop if it was paused
+                if (window.loop) {
+                    setTimeout(function() {
+                        console.log("Resuming game loop");
+                        window.loop();
+                    }, 500); // Small delay to ensure p5.js is fully loaded
+                }
+                
+                // Re-enable p5.js keyboard handling
+                if (window.p5KeyboardHandlingDisabled !== undefined) {
+                    window.p5KeyboardHandlingDisabled = false;
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <div id="game-container">
+        <!-- p5.js will create the canvas element here -->
+    </div>
+    
+    <!-- Help button - now integrated into the game screens -->
+    
+    <!-- Score submission modal -->
+    <div id="score-modal" class="modal">
+        <button class="close-btn">&times;</button>
+        <div id="score-form-content">
+            <h2>Submit Your Score</h2>
+            <p>Great job! You scored <span id="final-score">0</span> points, reached level <span id="final-level">1</span> and wave <span id="final-wave">1</span>.</p>
+            
+            <form id="score-form">
+                <div class="form-group">
+                    <label for="player-name">Your Name</label>
+                    <input type="text" id="player-name" required onclick="this.focus();" onfocus="this.select();">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required onclick="this.focus();" onfocus="this.select();">
+                </div>
+                
+                <button type="submit" class="btn">Submit Score</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Leaderboard modal -->
+    <div id="leaderboard-modal" class="modal">
+        <button class="close-btn">&times;</button>
+        <h2>Cosmic Catalyst Leaderboard</h2>
+        <div class="leaderboard-container">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Score</th>
+                        <th>Level</th>
+                        <th>Wave</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- Leaderboard data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Overlay for modals -->
+    <div id="overlay" class="overlay"></div>
+    
+    <!-- Floating buttons are now integrated into the game start screen -->
+</body>
+<script>
+    // Ensure the game is properly initialized
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM fully loaded, checking game initialization");
+        
+        // Check if game variables are properly exposed to window
+        setTimeout(function() {
+            console.log("Game state check:", {
+                gameStarted: window.gameStarted,
+                gameOver: window.gameOver,
+                waveNumber: window.waveNumber,
+                resetGame: typeof window.resetGame === 'function' ? 'Available' : 'Not available'
+            });
+            
+            // If resetGame is available but gameStarted is undefined, initialize it
+            if (typeof window.resetGame === 'function' && window.gameStarted === undefined) {
+                console.log("Initializing missing game state variables");
+                window.gameStarted = false;
+                window.gameOver = false;
+                window.waveNumber = 1;
+            }
+        }, 1000);
+    });
+</script>
+</html>

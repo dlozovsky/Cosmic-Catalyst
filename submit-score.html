@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Score - Cosmic Catalyst</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #0a0a1a;
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .container {
+            background-color: rgba(10, 20, 40, 0.95);
+            border: 2px solid #0096ff;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.7);
+        }
+        
+        h1 {
+            color: #0096ff;
+            margin-top: 0;
+            text-align: center;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        p {
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #0096ff;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #0096ff;
+            background-color: rgba(0, 20, 40, 0.5);
+            color: #fff;
+            border-radius: 5px;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            box-shadow: 0 0 5px #0af;
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .form-buttons button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #submit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #submit-btn:hover {
+            background-color: #45a049;
+        }
+        
+        #cancel-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        #cancel-btn:hover {
+            background-color: #d32f2f;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-link a {
+            color: #0096ff;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        .back-link a:hover {
+            color: #00b0ff;
+            text-decoration: underline;
+        }
+    </style>
+    <!-- Load Supabase JS library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Load your configuration file -->
+    <script src="supabase-config.js"></script>
+    <script>
+        // Initialize Supabase client
+        let supabaseClient;
+        
+        // Submit score to leaderboard
+        async function submitScore(playerName, email, score, level, wave) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('leaderboard')
+                    .insert([
+                        { 
+                            player_name: playerName,
+                            email: email,
+                            score: score,
+                            level: level,
+                            wave: wave,
+                            shared_on_x: false
+                        }
+                    ]);
+                
+                if (error) throw error;
+                
+                return { success: true, data };
+            } catch (error) {
+                console.error('Error submitting score:', error);
+                return { success: false, error };
+            }
+        }
+        
+        // DOM event handlers
+        window.addEventListener('DOMContentLoaded', () => {
+            // Get score data from localStorage
+            const score = localStorage.getItem('gameScore') || 0;
+            const level = localStorage.getItem('gameLevel') || 1;
+            const wave = localStorage.getItem('gameWave') || 1;
+            
+            // Update the score display
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-level').textContent = level;
+            document.getElementById('final-wave').textContent = wave;
+            
+            // Initialize Supabase client
+            try {
+                console.log("Initializing Supabase client with:", {
+                    url: supabaseConfig.supabaseUrl,
+                    keyLength: supabaseConfig.supabaseAnonKey ? supabaseConfig.supabaseAnonKey.length : 0
+                });
+                
+                supabaseClient = window.supabase.createClient(
+                    supabaseConfig.supabaseUrl, 
+                    supabaseConfig.supabaseAnonKey
+                );
+                
+                console.log("Supabase client initialized successfully:", supabaseClient);
+            } catch (error) {
+                console.error("Error initializing Supabase client:", error);
+            }
+            
+            // Handle form submission
+            document.getElementById('score-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const submitBtn = document.getElementById('submit-btn');
+                const cancelBtn = document.getElementById('cancel-btn');
+                
+                // Disable buttons during submission
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+                cancelBtn.disabled = true;
+                
+                const playerName = document.getElementById('player-name').value;
+                const playerEmail = document.getElementById('player-email').value;
+                const score = parseInt(localStorage.getItem('gameScore') || '0');
+                const level = parseInt(localStorage.getItem('gameLevel') || '1');
+                const wave = parseInt(localStorage.getItem('gameWave') || '1');
+                
+                try {
+                    // Check if Supabase client is initialized
+                    if (!supabaseClient) {
+                        throw new Error('Supabase client is not initialized. Please refresh the page and try again.');
+                    }
+                    
+                    // Use the submitScore function instead of direct Supabase call
+                    const result = await submitScore(playerName, playerEmail, score, level, wave);
+                    
+                    if (!result.success) {
+                        throw result.error;
+                    }
+                    
+                    // Show success message
+                    alert('Score submitted successfully!');
+                    
+                    // Set the returning flag and redirect back to the game
+                    sessionStorage.setItem('returningToGame', 'true');
+                    window.location.href = 'index.html';
+                    
+                } catch (error) {
+                    console.error('Error submitting score:', error);
+                    
+                    // Provide more specific error messages
+                    let errorMessage = 'Error submitting score. ';
+                    
+                    if (error.message) {
+                        if (error.message.includes('duplicate key')) {
+                            errorMessage += 'You have already submitted a score with this name and email.';
+                        } else if (error.message.includes('not found')) {
+                            errorMessage += 'The leaderboard table does not exist. Please contact the administrator.';
+                        } else if (error.message.includes('permission denied')) {
+                            errorMessage += 'Permission denied. Anonymous inserts may not be allowed.';
+                        } else if (error.message.includes('network')) {
+                            errorMessage += 'Network error. Please check your internet connection.';
+                        } else {
+                            errorMessage += error.message;
+                        }
+                    } else {
+                        errorMessage += 'Please try again.';
+                    }
+                    
+                    alert(errorMessage);
+                    
+                    // Re-enable buttons
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Score';
+                    cancelBtn.disabled = false;
+                }
+            });
+            
+            // Handle cancel button
+            document.getElementById('cancel-btn').addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        });
+        
+        // Function to return to the game and resume the game loop
+        function returnToGame() {
+            // Navigate back to the game
+            window.location.href = 'index.html';
+        }
+        
+        // Add event listener for the window's beforeunload event
+        window.addEventListener('beforeunload', function() {
+            // Store a flag in sessionStorage to indicate we're returning to the game
+            sessionStorage.setItem('returningToGame', 'true');
+        });
+    </script>
+</head>
+<body>
+    <div class="container" id="form-container">
+        <h1>Submit Your Score</h1>
+        <p>Great job! You scored <span id="final-score">0</span> points, reached level <span id="final-level">1</span> and wave <span id="final-wave">1</span>.</p>
+        
+        <form id="score-form">
+            <div class="form-group">
+                <label for="player-name">Your Name</label>
+                <input type="text" id="player-name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="player-email" required>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="submit" id="submit-btn">Submit Score</button>
+                <button type="button" id="cancel-btn" onclick="returnToGame()">Cancel</button>
+            </div>
+        </form>
+        
+        <div class="back-link">
+            <a href="index.html" onclick="sessionStorage.setItem('returningToGame', 'true');">Back to Game</a>
+        </div>
+    </div>
+</body>
+</html> 
