@@ -39,6 +39,10 @@ To run the game locally:
 - Sound effects and music from [Source if applicable]
 - Inspired by classic arcade space shooters
 
+## Last Updated
+
+This game was last updated on May 5, 2024.
+
 ## Security Notice
 
 ⚠️ **Important Security Information** ⚠️
