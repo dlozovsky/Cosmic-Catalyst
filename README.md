@@ -1,8 +1,43 @@
 # Cosmic Catalyst
 
-A modern, visually appealing space shooter game built with p5.js and featuring Supabase integration for leaderboard functionality.
+A space shooter game built with p5.js and Supabase.
 
-![Cosmic Catalyst Game Screenshot](screenshot.png)
+## Play the Game
+
+You can play the game online at: [https://dlozovsky.github.io/Cosmic-Catalyst/](https://dlozovsky.github.io/Cosmic-Catalyst/)
+
+## Game Features
+
+- Fast-paced space shooter gameplay
+- Multiple enemy types
+- Power-ups and special abilities
+- Progressive difficulty with waves and levels
+- Global leaderboard using Supabase
+
+## How to Play
+
+- Use WASD or arrow keys to move your ship
+- Press SPACE to shoot
+- Collect power-ups to enhance your abilities
+- Survive as long as possible and achieve the highest score
+
+## Development
+
+This game was built using:
+- p5.js for rendering and game logic
+- Supabase for the backend leaderboard functionality
+
+## Local Development
+
+To run the game locally:
+1. Clone this repository
+2. Open `index.html` in your browser
+
+## Credits
+
+- Game developed by [Your Name]
+- Sound effects and music from [Source if applicable]
+- Inspired by classic arcade space shooters
 
 ## Security Notice
 
@@ -22,35 +57,6 @@ The current implementation includes Supabase credentials directly in the fronten
 - Social sharing via X (Twitter)
 - Responsive design that works on different screen sizes
 - Detailed help documentation
-
-## How to Play
-
-### Controls
-- **Arrow Keys/WASD**: Control your spaceship
-  - **Up/W**: Apply thrust forward
-  - **Down/S**: Apply thrust backward
-  - **Left/A**: Rotate your ship left
-  - **Right/D**: Rotate your ship right
-- **Spacebar**: Fire weapons
-- **C**: Toggle between Arrow Keys and WASD controls
-- **Enter**: Start game / Restart after game over
-
-### Gameplay
-Navigate your spaceship through space, destroying enemy ships while avoiding collisions. Your ship wraps around the screen edges, allowing continuous movement. Complete waves of enemies to progress through the game, with each wave becoming more challenging.
-
-### Power-ups
-Collect power-ups to enhance your abilities:
-- **Triple Shot (Yellow)**: Fire three projectiles at once
-- **Shield (Blue)**: Absorb damage from enemy collisions
-- **Speed Boost (Green)**: Temporarily increase ship speed
-
-### Enemies
-Different enemy types have unique behaviors:
-- **Red Squares**: Basic enemies that move in straight lines
-- **Green Circles**: Home in on your position
-- **Yellow Triangles**: Move in zigzag patterns
-- **Purple Hexagons**: Advanced enemies with erratic movement
-- **Red Boss**: Powerful enemies with high health
 
 ## Leaderboard & Social Sharing
 
